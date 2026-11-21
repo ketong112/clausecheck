@@ -1,0 +1,16 @@
+{
+  "name": "clausecheck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ClauseCheck — Read the fine print before you sign. Hybrid AI (Gemini Nano on-device + Gemini Flash cloud) contract explainer. Firebase #BuildHybridAI 2026.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "firebase": "^13.4.0",
+    "vite": "^8.3.8"
+  }
+}
