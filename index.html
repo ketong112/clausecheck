@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClauseCheck — Read the fine print before you sign</title>
+    <meta
+      name="description"
+      content="ClauseCheck turns any contract's fine print into plain English: on-device clause scanner (Gemini Nano) plus cloud summary, risk score and negotiation kit (Gemini Flash)."
+    />
+    <script type="module" crossorigin src="./assets/index-D5cvyH0O.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-em7M72KP.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <h1>ClauseCheck</h1>
+        <p class="tagline">Read the fine print before you sign.</p>
+        <p class="sub">
+          Paste any contract — rental agreement, freelance gig terms, loan or
+          subscription terms — and understand it in plain English. Your
+          contract is scanned <strong>on your device</strong>; only the
+          full-document summary uses the cloud.
+        </p>
+        <div class="status-row">
+          <span id="nanoStatus" class="pill warn">Checking on-device model…</span>
+          <button id="btnPrepareNano" class="btn small">Prepare on-device model</button>
+          <span id="nanoProgress" class="muted"></span>
+        </div>
+        <div id="demoBanner" class="notice demo-banner" hidden>
+          <strong>Demo mode.</strong> No Firebase config has been added yet, so
+          this build runs a built-in rule-based preview — every result is badged
+          DEMO and is <em>not</em> AI output. To enable real hybrid AI, paste your
+          Firebase web app config into <code>src/firebase-config.js</code>
+          (see README) and rebuild. Nothing leaves your browser in demo mode.
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="card">
+        <h2>1 · Paste your contract</h2>
+        <label class="sr-only" for="contractInput">Contract text</label>
+        <textarea
+          id="contractInput"
+          rows="14"
+          placeholder="Paste the contract text here… (rental agreement, freelance terms, loan terms, subscription terms)"
+        ></textarea>
+        <div class="row">
+          <button id="btnSample" class="btn ghost">Load sample rental agreement</button>
+          <button id="btnScan" class="btn primary">Scan clauses — on-device</button>
+          <button id="btnClear" class="btn ghost">Clear</button>
+        </div>
+        <p id="scanStatus" class="status" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>2 · Risky clauses</h2>
+        <p class="muted">
+          The scanner flags risky clauses with a severity and a one-line reason.
+          It runs on-device (Gemini Nano) so your contract text never leaves
+          this device. Click <em>Explain</em> or <em>Rewrite</em> on any clause.
+        </p>
+        <div id="scanResults"></div>
+      </section>
+
+      <section id="explainPanel" class="card" hidden>
+        <h2>Clause detail</h2>
+        <h3>What this clause means</h3>
+        <div class="badge-row"><span id="explainBadge"></span></div>
+        <p id="explainText" class="muted">Use “Explain this clause” on a clause to see it explained here.</p>
+        <div id="rewriteBlock">
+          <h3>Plain-English rewrite</h3>
+          <div class="badge-row"><span id="rewriteBadge"></span></div>
+          <p id="rewriteText" class="muted">Use “Rewrite in plain English” on a clause to see a fairer version here.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3 · Full summary &amp; negotiation kit</h2>
+        <p class="muted">
+          The cloud model (Gemini Flash) reads the whole document and writes a
+          plain-English summary, a risk score, and a negotiation checklist with
+          a draft email. Use it after the scan.
+        </p>
+        <div class="row">
+          <button id="btnSummarize" class="btn primary">Summarise &amp; build negotiation kit — cloud</button>
+        </div>
+        <p id="summaryStatus" class="status" role="status"></p>
+        <div id="summarySection" hidden>
+          <div class="badge-row"><span id="summaryBadge"></span></div>
+          <h3>Summary</h3>
+          <p id="summaryText"></p>
+          <h3>Risk score</h3>
+          <p class="risk-line">
+            <strong id="riskScore">– / 100</strong>
+            <span id="riskLabel" class="muted"></span>
+          </p>
+          <div class="risk-bar"><div id="riskBarFill" class="risk-fill low" style="width: 0%"></div></div>
+          <h3>Top risks</h3>
+          <ul id="topRisks"></ul>
+          <h3>Negotiation checklist — ask before you sign</h3>
+          <ul id="checklist"></ul>
+          <h3>Draft email to the other party</h3>
+          <textarea id="draftEmail" rows="12" readonly></textarea>
+          <div class="row">
+            <button id="btnCopyEmail" class="btn">Copy email</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Your saved analyses</h2>
+        <p class="muted">
+          Analyses are saved only in this browser (localStorage). No account, no
+          upload. Click an entry to reload it.
+        </p>
+        <ul id="historyList" class="history"></ul>
+        <div class="row">
+          <button id="btnClearHistory" class="btn small ghost">Clear saved analyses</button>
+        </div>
+      </section>
+
+      <section class="card how">
+        <h2>How the hybrid AI works</h2>
+        <ul>
+          <li><strong>On-device — Gemini Nano 4:</strong> instant clause scanner + “explain this clause”. Private by design: names, addresses and amounts never leave your device. Single-turn text generation.</li>
+          <li><strong>Hybrid — prefer on-device:</strong> plain-English clause rewrite. Local first, cloud fallback, so it always works.</li>
+          <li><strong>Cloud — Gemini Flash:</strong> full-document summary, risk score, negotiation checklist and draft email. Long-context reasoning the on-device model cannot do.</li>
+          <li>Every AI answer carries a badge showing where it actually ran, read from the SDK’s <code>response.inferenceSource</code> (<code>ON_DEVICE</code> / <code>IN_CLOUD</code>).</li>
+          <li>On-device needs Chrome 139+ on desktop with the flag <code>chrome://flags/#prompt-api-for-gemini-nano-multimodal-input</code> enabled and the model downloaded. Without it, the app falls back to the cloud.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          <strong>ClauseCheck explains — it does not give legal advice.</strong>
+          For binding decisions, talk to a qualified lawyer. Built for the
+          Firebase #BuildHybridAI 2026 hackathon with Firebase AI Logic
+          (Gemini Nano on-device + Gemini Flash in the cloud).
+        </p>
+      </div>
+    </footer>
+
+  </body>
+</html>
